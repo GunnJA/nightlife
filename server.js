@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const mongo = require('mongodb').MongoClient
 const dbCollectionUser = "voteruser";
+let loggedIn = false;
 let offsetDefault = 10;
 let database;
 let collect;
@@ -47,6 +48,21 @@ app.get("/", function (req, res) {
   res.sendfile(__dirname + '/index.html');
 });
 
+// user check routing
+app.get("/usercheck", function (req, res) {
+  let user = req.query.user;
+  exists(collect,{"user":user}).then(function(bool) {
+    console.log("bool",bool);
+    if (bool) {
+      // already exists
+      res.send({"user": "existing"})
+    } else {
+      // doesn't exist
+      res.send({"user": "new"})
+    }
+  })
+});
+
 // signup routing
 app.get("/signup", function (req, res) {
   let user = req.query.user;
@@ -54,15 +70,35 @@ app.get("/signup", function (req, res) {
   exists(collect,{"user":user}).then(function(bool) {
     if (bool) {
       // already exists
-      res.send({"error":`user ${user} already exists`});
+      res.send({"error": `user ${user} already exists`})
     } else {
       // doesn't exist
+      console.log("signup bool", bool);
       dbInsert(collect,{"user":user,"pass":pass},res);
-      res.send({"nice":`user ${user} added`});
+      res.send({"loggedIn": true});
     }
   })
 });
 
+// login routing
+app.get("/login", function (req, res) {
+  let user = req.query.user;
+  let pass = req.query.pass;
+  exists(collect,{"user":user, "pass":pass}).then(function(bool) {
+    if (bool) {
+      // password match
+      res.send({"loggedIn": true});
+    } else {
+      // password incorrect
+      res.send({"error":`password for user ${user} incorrect`});
+    }
+  })
+});
+
+// logout routing
+app.get("/logout", function (req, res) {
+    res.send({"loggedIn": false});
+});
 
 // listen for requests :)
 var listener = app.listen(process.env.PORT, function () {

@@ -2,16 +2,19 @@ const express = require('express');
 const app = express();
 const mongo = require('mongodb').MongoClient
 const dbCollectionUser = "voteruser";
+const dbCollectionPolls = "voterpolls";
 let loggedIn = false;
 let offsetDefault = 10;
 let database;
-let collect;
+let collectUser;
+let collectPoll;
 
 //DB functions
 mongo.connect('mongodb://gunnja:gunnja@ds131854.mlab.com:31854/fccdb',(err, db) => {
   if (err) throw err
   else console.log("db connection successful")
-  collect = db.collection(dbCollectionUser);
+  collectUser = db.collection(dbCollectionUser);
+  collectPoll = db.collection(dbCollectionPolls);
   database = db;
 // db.close();
 });
@@ -22,6 +25,24 @@ function dbInsert(collection,obj) {
     database.close;
   })
 }
+
+function dbUpdate(collection,obj,name) {
+  let qObj = { "name" : name };
+  collection.update(qObj, obj, function(err, data) {
+    if (err) throw err
+    database.close;
+  })
+}
+
+function dbFindOne(collection,pollName) {
+  return new Promise(function(resolve, reject) {
+    collection.findOne({"name":pollName}, function(err, data) {
+      if (err) throw err
+      else resolve(data);
+    })
+  })
+}
+
 
 function exists(collection, obj) {
   return new Promise(function(resolve, reject) {
@@ -67,14 +88,14 @@ app.get("/usercheck", function (req, res) {
 app.get("/signup", function (req, res) {
   let user = req.query.user;
   let pass = req.query.pass;
-  exists(collect,{"user":user}).then(function(bool) {
+  exists(collectUser,{"user":user}).then(function(bool) {
     if (bool) {
       // already exists
       res.send({"error": `user ${user} already exists`})
     } else {
       // doesn't exist
       console.log("signup bool", bool);
-      dbInsert(collect,{"user":user,"pass":pass},res);
+      dbInsert(collectUser,{"user":user,"pass":pass},res);
       res.send({"loggedIn": true});
     }
   })
@@ -84,7 +105,7 @@ app.get("/signup", function (req, res) {
 app.get("/login", function (req, res) {
   let user = req.query.user;
   let pass = req.query.pass;
-  exists(collect,{"user":user, "pass":pass}).then(function(bool) {
+  exists(collectUser,{"user":user, "pass":pass}).then(function(bool) {
     if (bool) {
       // password match
       res.send({"loggedIn": true});
@@ -100,8 +121,55 @@ app.get("/logout", function (req, res) {
     res.send({"loggedIn": false});
 });
 
+// new poll routing
+app.get("/new", function (req, res) {
+  let pollName = req.query.name;
+  exists(collectPoll,{"name":pollName}).then(function(bool) {
+    if (bool) {
+      // already exists
+      res.send({'existing': bool });
+    } else {
+      dbInsert(collectPoll,{"name":pollName});
+      res.send({'existing': bool });
+    }
+  });
+});
+
+// add options routing
+app.get("/modify", function (req, res) {
+  let pollName = req.query.name;
+  let option = req.query.option;
+  dbFindOne(collectPoll,pollName).then(function(data) {
+    let pollObj = data;
+    if (pollObj.options) {
+      // options exists
+      if (option in pollObj.options) {
+        // new option already exists
+        res.send({"error": "option already exists"});
+      } else {
+        // new option doesnt exist
+        let options = pollObj.options;
+        options[option] = 0;
+        let newObj = { "name" : pollName, "options" : options};
+        console.log("1st",newObj);
+        dbUpdate(collectPoll,newObj,pollName);
+        res.send(newObj);
+      }
+    } else {
+      // options doesnt exist
+      let options = {};
+      options[option] = 0;
+      let newObj = { "name" : pollName, "options" : options};
+      console.log("2nd",newObj);
+      dbUpdate(collectPoll,newObj,pollName);
+      res.send(newObj);
+    }
+  })
+});
+
 // listen for requests :)
 var listener = app.listen(process.env.PORT, function () {
   console.log('Your app is listening on port ' + listener.address().port);
 });
+
 

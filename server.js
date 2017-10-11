@@ -34,6 +34,25 @@ function dbUpdate(collection,obj,name) {
   })
 }
 
+function dbVote(collection,name,option) {
+  let qObj = { "name" : name };
+  return new Promise(function(resolve,reject) {
+    dbFindOne(collection,name).then(function(data) {
+      let wholeObj = data;
+      console.log(wholeObj, option);
+      let newObj = wholeObj.options;
+      newObj[option] += 1;
+      wholeObj.options = newObj;
+      console.log(newObj);
+      collection.update(qObj, wholeObj, function(err, data) {
+      if (err) throw err
+      database.close;
+      resolve(wholeObj);
+      })
+    });
+  });
+}
+
 function dbFindOne(collection,pollName) {
   return new Promise(function(resolve, reject) {
     collection.findOne({"name":pollName}, function(err, data) {
@@ -72,7 +91,7 @@ app.get("/", function (req, res) {
 // user check routing
 app.get("/usercheck", function (req, res) {
   let user = req.query.user;
-  exists(collect,{"user":user}).then(function(bool) {
+  exists(collectUser,{"user":user}).then(function(bool) {
     console.log("bool",bool);
     if (bool) {
       // already exists
@@ -136,7 +155,7 @@ app.get("/new", function (req, res) {
 });
 
 // add options routing
-app.get("/modify", function (req, res) {
+app.post("/modify", function (req, res) {
   let pollName = req.query.name;
   let option = req.query.option;
   dbFindOne(collectPoll,pollName).then(function(data) {
@@ -164,6 +183,15 @@ app.get("/modify", function (req, res) {
       dbUpdate(collectPoll,newObj,pollName);
       res.send(newObj);
     }
+  })
+});
+
+// vote routing
+app.get("/vote", function (req, res) {
+  let pollName = req.query.name;
+  let optionName = req.query.option;
+  dbVote(collectPoll,pollName,optionName).then(function(obj) {
+    res.send(obj);
   })
 });
 

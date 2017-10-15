@@ -19,14 +19,14 @@ mongo.connect('mongodb://gunnja:gunnja@ds131854.mlab.com:31854/fccdb',(err, db) 
 // db.close();
 });
 
-function dbInsert(collection,obj) {
+function dbInsert(user,collection,obj) {
   collection.insert(obj, function(err, data) {
     if (err) throw err
     database.close;
   })
 }
 
-function dbUpdate(collection,obj,name) {
+function dbUpdate(user,collection,obj,name) {
   let qObj = { "name" : name };
   collection.update(qObj, obj, function(err, data) {
     if (err) throw err
@@ -62,6 +62,15 @@ function dbFindOne(collection,pollName) {
   })
 }
 
+function dbFindAll(collection,user) {
+  return new Promise(function(resolve, reject) {
+    collection.find(user).toArray(function(err,items) {
+      if (err) throw err
+      console.log(items);
+      resolve(items);
+    });
+  })
+}
 
 function exists(collection, obj) {
   return new Promise(function(resolve, reject) {
@@ -88,6 +97,8 @@ app.get("/", function (req, res) {
   res.sendfile(__dirname + '/index.html');
 });
 
+
+// User Functionality -------
 // user check routing
 app.get("/usercheck", function (req, res) {
   let user = req.query.user;
@@ -140,17 +151,29 @@ app.get("/logout", function (req, res) {
     res.send({"loggedIn": false});
 });
 
+// Poll Functionality -------
 // new poll routing
 app.get("/new", function (req, res) {
   let pollName = req.query.name;
-  exists(collectPoll,{"name":pollName}).then(function(bool) {
+  let user = req.query.user;
+  exists(collectPoll,{"user":user,"name":pollName}).then(function(bool) {
     if (bool) {
       // already exists
       res.send({'existing': bool });
     } else {
-      dbInsert(collectPoll,{"name":pollName});
+      dbInsert(user,collectPoll,{"user":user,"name":pollName});
       res.send({'existing': bool });
     }
+  });
+});
+
+// get user polls
+app.get("/existing", function (req, res) {
+  let user = req.query.user;
+  console.log(user);
+  dbFindAll(collectPoll,{"user":user}).then(function(obj) {
+    console.log(obj);
+    res.send(obj);
   });
 });
 
@@ -158,6 +181,7 @@ app.get("/new", function (req, res) {
 app.post("/modify", function (req, res) {
   let pollName = req.query.name;
   let option = req.query.option;
+  let user = req.query.user;
   dbFindOne(collectPoll,pollName).then(function(data) {
     let pollObj = data;
     if (pollObj.options) {
@@ -169,18 +193,18 @@ app.post("/modify", function (req, res) {
         // new option doesnt exist
         let options = pollObj.options;
         options[option] = 0;
-        let newObj = { "name" : pollName, "options" : options};
+        let newObj = {"user":user, "name" : pollName, "options" : options};
         console.log("1st",newObj);
-        dbUpdate(collectPoll,newObj,pollName);
+        dbUpdate(user,collectPoll,newObj,pollName);
         res.send(newObj);
       }
     } else {
       // options doesnt exist
       let options = {};
       options[option] = 0;
-      let newObj = { "name" : pollName, "options" : options};
+      let newObj = {"user":user, "name" : pollName, "options" : options};
       console.log("2nd",newObj);
-      dbUpdate(collectPoll,newObj,pollName);
+      dbUpdate(user,collectPoll,newObj,pollName);
       res.send(newObj);
     }
   })
@@ -199,5 +223,3 @@ app.get("/vote", function (req, res) {
 var listener = app.listen(process.env.PORT, function () {
   console.log('Your app is listening on port ' + listener.address().port);
 });
-
-

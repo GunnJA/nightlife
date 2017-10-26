@@ -19,7 +19,7 @@ mongo.connect('mongodb://gunnja:gunnja@ds131854.mlab.com:31854/fccdb',(err, db) 
 // db.close();
 });
 
-function dbInsert(user,collection,obj) {
+function dbInsert(collection,obj) {
   collection.insert(obj, function(err, data) {
     if (err) throw err
     database.close;
@@ -97,23 +97,7 @@ app.get("/", function (req, res) {
   res.sendfile(__dirname + '/index.html');
 });
 
-
 // User Functionality -------
-// user check routing
-app.get("/usercheck", function (req, res) {
-  let user = req.query.user;
-  exists(collectUser,{"user":user}).then(function(bool) {
-    console.log("bool",bool);
-    if (bool) {
-      // already exists
-      res.send({"user": "existing"})
-    } else {
-      // doesn't exist
-      res.send({"user": "new"})
-    }
-  })
-});
-
 // signup routing
 app.get("/signup", function (req, res) {
   let user = req.query.user;
@@ -125,7 +109,7 @@ app.get("/signup", function (req, res) {
     } else {
       // doesn't exist
       console.log("signup bool", bool);
-      dbInsert(collectUser,{"user":user,"pass":pass},res);
+      dbInsert(collectUser,{"user":user,"pass":pass});
       res.send({"loggedIn": true});
     }
   })
@@ -161,7 +145,7 @@ app.get("/new", function (req, res) {
       // already exists
       res.send({'existing': bool });
     } else {
-      dbInsert(user,collectPoll,{"user":user,"name":pollName});
+      dbInsert(collectPoll,{"user":user,"name":pollName});
       res.send({'existing': bool });
     }
   });

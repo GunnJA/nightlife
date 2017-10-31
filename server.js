@@ -97,6 +97,25 @@ app.get("/", function (req, res) {
   res.sendfile(__dirname + '/index.html');
 });
 
+//app.get("/pollshare", function (req, res) {
+//  res.sendfile(__dirname + '/index.html');
+//  next();
+//});
+
+app.set('view engine', 'pug');
+
+app.get("/pollshare", function (req, res) {
+  if (req.query.name) {
+    let name = req.query.name;
+    console.log(name);
+    dbFindOne(collectPoll,{"name": name}).then(function(obj) {
+      console.log(obj);
+      res.render('index', { pollObj: obj});
+    });
+  }
+});
+
+
 // User Functionality -------
 // signup routing
 app.get("/signup", function (req, res) {
@@ -163,10 +182,10 @@ app.get("/existing", function (req, res) {
 
 // retrieve poll
 app.get("/poll", function (req, res) {
-  let user = req.query.user;
+  //let user = req.query.user;
   let name = req.query.name;
-  console.log(user);
-  dbFindOne(collectPoll,{"user": user, "name": name}).then(function(obj) {
+  console.log(name);
+  dbFindOne(collectPoll,{"name": name}).then(function(obj) {
     console.log(obj);
     res.send(obj);
   });

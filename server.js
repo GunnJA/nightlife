@@ -62,9 +62,9 @@ function dbFindOne(collection,obj) {
   })
 }
 
-function dbFindAll(collection,user) {
+function dbFindAll(collection,obj) {
   return new Promise(function(resolve, reject) {
-    collection.find(user).toArray(function(err,items) {
+    collection.find(obj).toArray(function(err,items) {
       if (err) throw err
       console.log(items);
       resolve(items);
@@ -88,6 +88,16 @@ function exists(collection, obj) {
     })
   })
 }
+
+function dbDelete(collection,obj) {
+  return new Promise(function(resolve, reject) {
+    collection.deleteOne(obj, function(err, data) {
+      if (err) throw err
+      else resolve({"delete": true});
+    })
+  })
+}
+
 
 // http://expressjs.com/en/starter/static-files.html
 app.use(express.static('public'));
@@ -170,14 +180,28 @@ app.get("/new", function (req, res) {
   });
 });
 
-// get user polls
-app.get("/existing", function (req, res) {
+// delete poll routing
+app.get("/delpoll", function (req, res) {
+  let pollName = req.query.name;
   let user = req.query.user;
-  console.log(user);
-  dbFindAll(collectPoll,{"user":user}).then(function(obj) {
-    console.log(obj);
+  dbDelete(collectPoll,{"user":user,"name":pollName}).then(function(obj) {
     res.send(obj);
   });
+});
+
+// get polls
+app.get("/existing", function (req, res) {
+  if (req.query.user) {
+    dbFindAll(collectPoll,{"user": req.query.user}).then(function(obj) {
+      console.log(obj);
+      res.send(obj);
+  });
+  } else {
+    dbFindAll(collectPoll,{}).then(function(obj) {
+      console.log(obj);
+      res.send(obj);
+  });
+  }
 });
 
 // retrieve poll

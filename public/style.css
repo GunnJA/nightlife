@@ -1,0 +1,23 @@
+.login1 {
+    border-bottom: 1px solid rgba(0, 0, 0, .10);
+    box-sizing: border-box;
+    padding: 3px 0;
+    margin-left: 10px;
+    padding-left: 5px;
+}
+
+.logForm {
+    width: 120px;
+}
+
+.delButt {
+    background-color:red;
+}
+
+.editButt {
+    border: 2px solid rgba(0, 2, 0, .30);
+}
+
+.shareURL {
+    width: 300px;
+}

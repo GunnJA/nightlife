@@ -1,0 +1,61 @@
+doctype html
+html
+	head
+		title Hello World
+		link(rel="stylesheet", href="/style.css")
+	body
+		header
+			h1
+				| Voting App
+		#logFormDiv
+			form#logForm.logForm
+				| Username:
+				input#username.login1(type="text")
+				br
+				#passwordDiv
+					| Password:
+					input#password.login1(type="password")
+				br
+				button#logButt(type="submit") Login
+			form#signForm.logForm(hidden="")
+				| Username:
+				input#usernameNew.login1(type="text")
+				br
+				#passwordDiv
+					| Create Password:
+					input#passwordNew.login1(type="password")
+				br
+				button#signButt(type="submit")
+					| Sign In
+			button#altButt.new(type="submit")
+				| New User?
+		button#outButt(type="submit", hidden="")
+			| Logout
+		br
+		br
+		form#newPoll(hidden="")
+			#newPollDiv
+				| Poll Name:
+				input#pollName(type="text", dissabled="true")
+				br
+				button#pollNextButt(type="submit") Next
+				br
+				br
+			#optionsDiv(hidden="")
+				| Option 1:
+				input#option1Input.option(type="text")
+				br
+				|           Option 2:
+				input#option2Input.option(type="text")
+				br
+				button#pollCreateButt(type="submit", disabled="")
+					| Create
+		button#allPollsButt(type="submit") Show All Polls
+		#chartContainer(style="height: 300px; width: 100%;")
+		#pollSpace
+		br
+		#existingSpace(data-key=pollObj)
+		// Your web-app is https, so your scripts need to be too
+		script(src="https://code.jquery.com/jquery-2.2.1.min.js", integrity="sha256-gvQgAFzTH6trSrAWoH1iPo9Xc96QxSZ3feW6kem+O00=", crossorigin="anonymous")
+		script(src="/client.js")
+		script(src="https://canvasjs.com/assets/script/canvasjs.min.js")

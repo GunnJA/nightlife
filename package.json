@@ -1,5 +1,5 @@
 {
-  "name": "FCC Voter",
+  "name": "fcc-voter",
   "version": "1.0.0",
   "description": "a simple poll app",
   "main": "server.js",

@@ -7,9 +7,11 @@
   "repository": "https://github.com/GunnJA/FCC_Voter.git",
   "author": "Jonathan Gunn <gunnja87@gmail.com>",
   "dependencies": {
-    "async": "~0.2.8",
-    "express": "~3.2.4",
+    "async": "~0.2.10",
+    "express": "~3.2.6",
     "pug": "^2.0.0-rc.4",
-    "socket.io": "~0.9.14"
+    "socket.io": "~0.9.14",
+    "mongodb": "~2.2.31",
+    "pug": "~2.0.0-rc.4"
   }
 }

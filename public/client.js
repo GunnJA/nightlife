@@ -108,7 +108,7 @@ function modOption(user,pollName,option) {
 
 function pollObjDisplay(obj) {
     let linkName = obj.name.replace(/\s+/g,"%20");
-    let newHTML = `Share URL:<input type="text" class="shareURL" value="https://fccvoter-gunnja.c9users.io/pollshare?name=${linkName}"></input>`;
+    let newHTML = `Share URL:<input type="text" class="shareURL" value="https://testingpollapp.herokuapp.com/pollshare?name=${linkName}"></input>`;
     newHTML += `<ul id="poll" data-key="${obj.name}">${obj.name}<br>`;
     let itemID = 0;
     $.each(obj.options, function(key, value) {

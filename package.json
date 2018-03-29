@@ -9,9 +9,8 @@
   "dependencies": {
     "async": "~0.2.10",
     "express": "~3.2.6",
-    "pug": "^2.0.0-rc.4",
     "socket.io": "~0.9.14",
     "mongodb": "~2.2.31",
-    "pug": "~2.0.0-rc.4"
+    "fb": "~2.0.0"
   }
 }
